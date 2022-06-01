@@ -1,0 +1,982 @@
+---
+swagger: "2.0"
+info:
+  description: Acqua Guardian API, captura dados de leituras dos sensores de oxigênio dissolvido, pH da água, temperatura da água, turbidez e TDS. Aplica cálculos para tabela de conversão alimentar.
+  version: 1.0.0
+  title: Acqua API
+  contact:
+    email: hokumura32@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+host: virtserver.swaggerhub.com
+basePath: /Carlos_Nobuaki/AcquaGuardian/1.0.0
+tags:
+- name: admins
+  description: Chamadas de modificações apenas pelos admins
+- name: developers
+  description: Operações disponibilizadas para desenvolvedores
+- name: user
+  description: Chamadas de modificações pelos usuários
+schemes:
+- https
+paths:
+  /values:
+    get:
+      tags:
+      - developers
+      summary: capturMedicoes
+      description: "Procura dados de medições efetuadas pelos sensores, puxa uma array com \ntodos os valores-----OBS: Devs de outros aplicativos só podem acessar os GETs------\n"
+      operationId: searchValues
+      produces:
+      - application/json
+      parameters:
+      - name: searchString
+        in: query
+        description: passa a procura de string opicional para medições
+        required: false
+        type: string
+      - name: skip
+        in: query
+        description: número para paginação
+        required: false
+        type: integer
+        minimum: 0
+        format: int32
+      - name: limit
+        in: query
+        description: Número máximo de valores que a API vai retornar
+        required: false
+        type: integer
+        maximum: 20
+        minimum: 0
+        format: int32
+      responses:
+        "200":
+          description: procura resultados por critérios
+          schema:
+            type: array
+            items:
+              type: string
+        "400":
+          description: Parâmetro errado
+  /oxygen:
+    get:
+      tags:
+      - developers
+      summary: capturOxygen
+      description: |
+        Procura dados da sonda de oxigênio dissolvido
+      operationId: searchOxygen
+      produces:
+      - application/json
+      parameters:
+      - name: getOxygen
+        in: query
+        description: passa a procura de string opicional para medições
+        required: false
+        type: string
+      - name: skip
+        in: query
+        description: número para paginação
+        required: false
+        type: integer
+        minimum: 0
+        format: int32
+      - name: limit
+        in: query
+        description: Número máximo de valores que a API vai retornar
+        required: false
+        type: integer
+        maximum: 20
+        minimum: 0
+        format: int32
+      responses:
+        "200":
+          description: procura resultados por critérios
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Oxygen'
+        "400":
+          description: Parâmetro errado
+    post:
+      tags:
+      - admins
+      summary: Adiciona valores de oxigênio
+      description: Adicione um ítem no sistema
+      operationId: addDeviceOxygen
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: MedicoesSensor
+        description: Inventory item to add
+        required: false
+        schema:
+          $ref: '#/definitions/Oxygen'
+      responses:
+        "201":
+          description: item criado
+        "400":
+          description: entrada ou objeto inválidos
+        "409":
+          description: já existe um ítem correspondente
+    put:
+      tags:
+      - admins
+      summary: UpdateNameOxygen
+      operationId: update
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Objeto precisa ser adicionado
+        required: true
+        schema:
+          $ref: '#/definitions/Oxygen/properties/name'
+      responses:
+        "400":
+          description: ID inválida
+        "404":
+          description: Nome não encontrado
+        "405":
+          description: Excedeu o tempo de validação
+  /oxygen{getOxygen}:
+    delete:
+      tags:
+      - admins
+      summary: Delete oxygen device
+      description: Isso só pode ser feito pelo admin.
+      operationId: deleteOxygenDevice
+      produces:
+      - application/json
+      parameters:
+      - name: getOxygen
+        in: path
+        description: O nome que será deletado.
+        required: true
+        type: string
+      responses:
+        "400":
+          description: Dispositivo inválido.
+        "404":
+          description: Dispositivo não encontrado.
+  /TDS:
+    get:
+      tags:
+      - developers
+      summary: capturTDS
+      description: |
+        Procura dados de medições do sensor de sólidos dissolvidos na água
+      operationId: searchTDS
+      produces:
+      - application/json
+      parameters:
+      - name: getTDS
+        in: query
+        description: passa a procura de string opicional para medições
+        required: false
+        type: string
+      - name: skip
+        in: query
+        description: número para paginação
+        required: false
+        type: integer
+        minimum: 0
+        format: int32
+      - name: limit
+        in: query
+        description: Número máximo de valores que a API vai retornar
+        required: false
+        type: integer
+        maximum: 20
+        minimum: 0
+        format: int32
+      responses:
+        "200":
+          description: procura resultados por critérios
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TDS'
+        "400":
+          description: Parâmetro errado
+    post:
+      tags:
+      - admins
+      summary: addTDS
+      description: Adiciona um ítem ao sistema
+      operationId: addTDS
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: MedicoesSensor
+        description: Ítem pronto para ser adicionado
+        required: false
+        schema:
+          $ref: '#/definitions/TDS'
+      responses:
+        "201":
+          description: item criado
+        "400":
+          description: entrada ou objeto invalidos
+        "409":
+          description: já existe um ítem correspondente
+    put:
+      tags:
+      - admins
+      summary: UpdateTDS
+      operationId: updateTDS
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Objeto precisa ser adicionado
+        required: true
+        schema:
+          $ref: '#/definitions/TDS'
+      responses:
+        "400":
+          description: TDS inválido
+        "404":
+          description: TDS não encontrado
+        "405":
+          description: Excedeu o tempo de validação
+  /TDS{getTDS}:
+    delete:
+      tags:
+      - admins
+      summary: Delete TDS device
+      description: Isso só pode ser feito pelo admin.
+      operationId: deleteTDSDevice
+      produces:
+      - application/json
+      parameters:
+      - name: getTDS
+        in: path
+        description: O nome que será deletado.
+        required: true
+        type: string
+      responses:
+        "400":
+          description: Dispositivo inválido.
+        "404":
+          description: Dispositivo não encontrado.
+  /Temperatura:
+    get:
+      tags:
+      - developers
+      summary: capturTemp
+      description: |
+        Procura dados de medições do sensor de temperatura da água
+      operationId: searchTemperatura
+      produces:
+      - application/json
+      parameters:
+      - name: getTemp
+        in: query
+        description: passa a procura de string opicional para medições
+        required: false
+        type: string
+      - name: skip
+        in: query
+        description: número para paginação
+        required: false
+        type: integer
+        minimum: 0
+        format: int32
+      - name: limit
+        in: query
+        description: Número máximo de valores que a API vai retornar
+        required: false
+        type: integer
+        maximum: 20
+        minimum: 0
+        format: int32
+      responses:
+        "200":
+          description: procura resultados por critérios
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Temperatura'
+        "400":
+          description: Parâmetro errado
+    post:
+      tags:
+      - admins
+      summary: adds medicoes sensores temperatura
+      description: Acidionando item ao sistema
+      operationId: addTemp
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: MedicoesSensor
+        description: Item pronto para ser adicionado
+        required: false
+        schema:
+          $ref: '#/definitions/Temperatura'
+      responses:
+        "201":
+          description: item criado
+        "400":
+          description: entrada e objeto inválidos
+        "409":
+          description: já existe um ítem correspondente
+    put:
+      tags:
+      - admins
+      summary: UpdateTemp
+      operationId: updateTemp
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Objeto precisa ser adicionado
+        required: true
+        schema:
+          $ref: '#/definitions/Temperatura'
+      responses:
+        "400":
+          description: Temp inválido
+        "404":
+          description: Temp não encontrado
+        "405":
+          description: Excedeu o tempo de validação
+  /Temperatura{getTemp}:
+    delete:
+      tags:
+      - admins
+      summary: Delete temp device
+      description: Isso só pode ser feito pelo admin.
+      operationId: deleteTempDevice
+      produces:
+      - application/json
+      parameters:
+      - name: getTemp
+        in: path
+        description: O nome que será deletado.
+        required: true
+        type: string
+      responses:
+        "400":
+          description: Dispositivo inválido.
+        "404":
+          description: Dispositivo não encontrado.
+  /pH:
+    get:
+      tags:
+      - developers
+      summary: capturpH
+      description: |
+        Procura dados de medições da sonda de pH
+      operationId: searchpH
+      produces:
+      - application/json
+      parameters:
+      - name: getpH
+        in: query
+        description: passa a procura de string opicional para medições
+        required: false
+        type: string
+      - name: skip
+        in: query
+        description: número para paginação
+        required: false
+        type: integer
+        minimum: 0
+        format: int32
+      - name: limit
+        in: query
+        description: Número máximo de valores que a API vai retornar
+        required: false
+        type: integer
+        maximum: 20
+        minimum: 0
+        format: int32
+      responses:
+        "200":
+          description: procura resultados por critérios
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/pH'
+        "400":
+          description: Parâmetro errado
+    post:
+      tags:
+      - admins
+      summary: adds medicoes sensores de pH
+      description: Adicionando item ao sistema
+      operationId: addpH
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: MedicoesSensor
+        description: Item pronto para ser adicionado
+        required: false
+        schema:
+          $ref: '#/definitions/pH'
+      responses:
+        "201":
+          description: item criado
+        "400":
+          description: entrada e objeto inválidos
+        "409":
+          description: já existe um item correspondente
+    put:
+      tags:
+      - admins
+      summary: UpdatepH
+      operationId: updatepH
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Objeto precisa ser adicionado
+        required: true
+        schema:
+          $ref: '#/definitions/pH'
+      responses:
+        "400":
+          description: pH inválido
+        "404":
+          description: pH não encontrado
+        "405":
+          description: Excedeu o tempo de validação
+  /pH{getpH}:
+    delete:
+      tags:
+      - admins
+      summary: Delete pH device
+      description: Isso só pode ser feito pelo admin.
+      operationId: deletepHDevice
+      produces:
+      - application/json
+      parameters:
+      - name: getpH
+        in: path
+        description: O nome que será deletado.
+        required: true
+        type: string
+      responses:
+        "400":
+          description: Dispositivo inválido.
+        "404":
+          description: Dispositivo não encontrado.
+  /turbidez:
+    get:
+      tags:
+      - developers
+      summary: capturturbidez
+      description: |
+        Procura dados de medições da sonda de turbidez
+      operationId: searchturbidez
+      produces:
+      - application/json
+      parameters:
+      - name: getturbidez
+        in: query
+        description: passa a procura de string opicional para medições
+        required: false
+        type: string
+      - name: skip
+        in: query
+        description: número para paginação
+        required: false
+        type: integer
+        minimum: 0
+        format: int32
+      - name: limit
+        in: query
+        description: Número máximo de valores que a API vai retornar
+        required: false
+        type: integer
+        maximum: 20
+        minimum: 0
+        format: int32
+      responses:
+        "200":
+          description: procura resultados por critérios
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/turbidez'
+        "400":
+          description: Parâmetro errado
+    post:
+      tags:
+      - admins
+      summary: adds medicoes sensores de turbidez
+      description: Adicionando item ao sistema
+      operationId: addturbidez
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: MedicoesSensorturbidez
+        description: Item pronto para ser adicionado
+        required: false
+        schema:
+          $ref: '#/definitions/turbidez'
+      responses:
+        "201":
+          description: item criado
+        "400":
+          description: entrada e objeto inválidos
+        "409":
+          description: já existe um item correspondente
+    put:
+      tags:
+      - admins
+      summary: Updateturbidez
+      operationId: updateturbidez
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Objeto precisa ser adicionado
+        required: true
+        schema:
+          $ref: '#/definitions/turbidez'
+      responses:
+        "400":
+          description: pH inválido
+        "404":
+          description: pH não encontrado
+        "405":
+          description: Excedeu o tempo de validação
+  /turbidez{getturbidez}:
+    delete:
+      tags:
+      - admins
+      summary: Delete turbidez device
+      description: Isso só pode ser feito pelo admin.
+      operationId: deleteturbidezDevice
+      produces:
+      - application/json
+      parameters:
+      - name: getturbidez
+        in: path
+        description: O nome que será deletado.
+        required: true
+        type: string
+      responses:
+        "400":
+          description: Dispositivo inválido.
+        "404":
+          description: Dispositivo não encontrado.
+  /user{username}:
+    get:
+      tags:
+      - user
+      summary: Capturando usuário pelo username
+      operationId: getUserByName
+      produces:
+      - application/json
+      parameters:
+      - name: username
+        in: path
+        description: O nome que precisa ser buscado, Use user1 para teste.
+        required: true
+        type: string
+      responses:
+        "200":
+          description: operação bem sucedida
+          schema:
+            $ref: '#/definitions/User'
+        "400":
+          description: Username inválido
+        "404":
+          description: Usuário não encontrado
+    put:
+      tags:
+      - user
+      summary: Updated user
+      description: Isso só pode ser feito com o usuário logado.
+      operationId: updateUser
+      produces:
+      - application/json
+      parameters:
+      - name: username
+        in: path
+        description: Nome que precisa ser modificado
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: Usuário modificado
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        "400":
+          description: Usuário inválido
+        "404":
+          description: Usuário não encontrado
+    delete:
+      tags:
+      - user
+      summary: Delete user
+      description: Isso só pode ser feito com o usuário logado.
+      operationId: deleteuser
+      produces:
+      - application/json
+      parameters:
+      - name: username
+        in: path
+        description: O nome que será deletado.
+        required: true
+        type: string
+      responses:
+        "400":
+          description: Username inválido.
+        "404":
+          description: Usuário não encontrado.
+  /user:
+    post:
+      tags:
+      - user
+      summary: adds novos usuarios
+      description: Acidionando usuario ao sistema
+      operationId: addUser
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: adicionaUsuario
+        description: Item pronto para ser adicionado
+        required: false
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        "201":
+          description: item criado
+        "400":
+          description: entrada e objeto inválidos
+        "409":
+          description: já existe um ítem correspondente
+  /conversaoAlimentar:
+    get:
+      tags:
+      - developers
+      summary: capturconversaoAlimentar
+      description: |
+        Procura conversaoAlimentar
+      operationId: searcconversaoAlimentar
+      produces:
+      - application/json
+      parameters:
+      - name: getconversaoAlimentar
+        in: query
+        description: passa a procura de string opicional para medições
+        required: false
+        type: string
+      - name: skip
+        in: query
+        description: número para paginação
+        required: false
+        type: integer
+        minimum: 0
+        format: int32
+      - name: limit
+        in: query
+        description: Número máximo de valores que a API vai retornar
+        required: false
+        type: integer
+        maximum: 20
+        minimum: 0
+        format: int32
+      responses:
+        "200":
+          description: procura resultados por critérios
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/conversaoAlimentar'
+        "400":
+          description: Parâmetro errado
+    post:
+      tags:
+      - admins
+      summary: adds medicoes de conversao alimentar
+      description: Adicionando item ao sistema
+      operationId: addconversaoAlimentar
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: MedicoesConversaoAlimentar
+        description: Item pronto para ser adicionado
+        required: false
+        schema:
+          $ref: '#/definitions/conversaoAlimentar'
+      responses:
+        "201":
+          description: item criado
+        "400":
+          description: entrada e objeto inválidos
+        "409":
+          description: já existe um item correspondente
+    put:
+      tags:
+      - admins
+      summary: UpdateconversaoAlimentar
+      operationId: updateconversaoAlimentar
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Objeto precisa ser adicionado
+        required: true
+        schema:
+          $ref: '#/definitions/conversaoAlimentar'
+      responses:
+        "400":
+          description: conversao inválido
+        "404":
+          description: conversao não encontrado
+        "405":
+          description: Excedeu o tempo de validação
+  /conversaoAlimentar{getconversaoAlimentar}:
+    delete:
+      tags:
+      - admins
+      summary: Delete conversaoAlimentar device
+      description: Isso só pode ser feito pelo admin.
+      operationId: deleteconversaoAlimentarDevice
+      produces:
+      - application/json
+      parameters:
+      - name: getconversaoAlimentar
+        in: path
+        description: O nome que será deletado.
+        required: true
+        type: string
+      responses:
+        "400":
+          description: Dispositivo inválido.
+        "404":
+          description: Dispositivo não encontrado.
+definitions:
+  Oxygen:
+    type: object
+    required:
+    - id
+    - manufacturer
+    - name
+    - releaseDate
+    - value
+    properties:
+      id:
+        type: string
+        example: oxy
+      name:
+        type: string
+        example: Oxigênio Dissolvido
+      releaseDate:
+        type: string
+        format: date-time
+        example: 2016-08-29T09:12:12.001+0000
+      value:
+        type: string
+        example: "8.2"
+      manufacturer:
+        $ref: '#/definitions/Manufacturer'
+  Manufacturer:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+        example: DFRobots
+      homePage:
+        type: string
+        format: url
+        example: https://www.dfrobot.com/product-1628.html
+  TDS:
+    type: object
+    required:
+    - id
+    - manufacturer
+    - name
+    - releaseDate
+    - value
+    properties:
+      id:
+        type: string
+        example: tds
+      name:
+        type: string
+        example: TDS
+      releaseDate:
+        type: string
+        format: date-time
+        example: 2016-08-29T09:12:22.001+0000
+      value:
+        type: string
+        example: "200.99"
+      manufacturer:
+        $ref: '#/definitions/Manufacturer'
+  Temperatura:
+    type: object
+    required:
+    - id
+    - manufacturer
+    - name
+    - releaseDate
+    - value
+    properties:
+      id:
+        type: string
+        example: Temp
+      name:
+        type: string
+        example: Temperatura da água
+      releaseDate:
+        type: string
+        format: date-time
+        example: 2016-08-29T09:11:10.001+0000
+      value:
+        type: string
+        example: "26.8"
+      manufacturer:
+        $ref: '#/definitions/Manufacturer'
+  pH:
+    type: object
+    required:
+    - id
+    - manufacturer
+    - name
+    - releaseDate
+    - value
+    properties:
+      id:
+        type: string
+        example: pH
+      name:
+        type: string
+        example: pH da água
+      releaseDate:
+        type: string
+        format: date-time
+        example: 2016-08-29T09:17:56.001+0000
+      value:
+        type: string
+        example: "6"
+      manufacturer:
+        $ref: '#/definitions/Manufacturer'
+  turbidez:
+    type: object
+    required:
+    - id
+    - manufacturer
+    - name
+    - releaseDate
+    - value
+    properties:
+      id:
+        type: string
+        example: turbidez
+      name:
+        type: string
+        example: Turbidez da água
+      releaseDate:
+        type: string
+        format: date-time
+        example: 2016-08-29T09:17:56.001+0000
+      value:
+        type: string
+        example: "10"
+      manufacturer:
+        $ref: '#/definitions/Manufacturer'
+  conversaoAlimentar:
+    type: object
+    required:
+    - biomassaFinal
+    - biomassaInicial
+    - id
+    - name
+    - racaoFornecida
+    - releaseDate
+    properties:
+      id:
+        type: string
+        example: pesoTanque01
+      name:
+        type: string
+        example: Operador
+      racaoFornecida:
+        type: string
+        example: "800"
+      biomassaFinal:
+        type: string
+        example: "12"
+      biomassaInicial:
+        type: string
+        example: "1"
+      releaseDate:
+        type: string
+        format: date-time
+        example: 2016-08-29T09:17:56.001+0000
+    description: 'Cálculo de Conversão Alimentar: Quantidade de ração fornecida(Kg) / dividido pela biomassa final(Kg) - menos a biomassa inicial(KG).'
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      username:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      userStatus:
+        type: integer
+        format: int32
+        description: User Status
+    xml:
+      name: User

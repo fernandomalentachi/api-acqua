@@ -1,0 +1,1 @@
+C:\Users\Fernando\Documents\Fatec\6Termo\API - Prof Querino\api-node-mongo> node .\index.js
